@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 import pandas as pd
 import joblib
+from pydantic import BaseModel
 from fastapi.middleware.cors import CORSMiddleware
-
 
 app = FastAPI()
 
@@ -19,22 +19,25 @@ app.add_middleware(
 )
 
 
-# Prediction API
-@app.get("/prediction")
-def prediction(
-    m1: int,
-    m2: int,
-    m3: int,
-    m4: int,
+# Data received from React
+class PredictionInput(BaseModel):
+    m1: int
+    m2: int
+    m3: int
+    m4: int
     m5: int
-):
+
+
+# POST prediction API
+@app.post("/prediction")
+def prediction(data: PredictionInput):
 
     new_data = pd.DataFrame({
-        "match1": [m1],
-        "match2": [m2],
-        "match3": [m3],
-        "match4": [m4],
-        "match5": [m5],
+        "match1": [data.m1],
+        "match2": [data.m2],
+        "match3": [data.m3],
+        "match4": [data.m4],
+        "match5": [data.m5],
     })
 
     runs = model.predict(new_data)
@@ -47,6 +50,4 @@ def prediction(
 # Test API
 @app.get("/")
 def testapi():
-    return {
-        "msg": "API Tested Successfully"
-    }
+    return {"msg": "API Tested Successfully"}
